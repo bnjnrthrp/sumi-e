@@ -1,6 +1,9 @@
 #include "GUI.h"
 #include "imgui/imgui.h"
 #include <iostream>
+#include <cmath>
+
+#define DEBUG 0; // Change to 1 for debugging print statements
 
 void GUI::init(GLFWwindow *window, const char* glsl_version)
 {
@@ -21,36 +24,14 @@ void GUI::newFrame(){
 	ImGui::NewFrame();
 }
 
-// from https://github.com/conan-io/examples/blob/master/libraries/dear-imgui/basic/main.cpp
-void GUI::render_conan_logo()
-{
-	ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-	
-	float sz = 300.0f;
-	static ImVec4 col1 = ImVec4(68.0 / 255.0, 83.0 / 255.0, 89.0 / 255.0, 1.0f);
-	static ImVec4 col2 = ImVec4(40.0 / 255.0, 60.0 / 255.0, 80.0 / 255.0, 1.0f);
-	static ImVec4 col3 = ImVec4(50.0 / 255.0, 65.0 / 255.0, 82.0 / 255.0, 1.0f);
-	static ImVec4 col4 = ImVec4(20.0 / 255.0, 40.0 / 255.0, 60.0 / 255.0, 1.0f);
-	const ImVec2 p = ImGui::GetCursorScreenPos();
-	float x = p.x + 4.0f, y = p.y + 4.0f;
-	draw_list->AddQuadFilled(ImVec2(x, y + 0.25 * sz), ImVec2(x + 0.5 * sz, y + 0.5 * sz), ImVec2(x + sz, y + 0.25 * sz), ImVec2(x + 0.5 * sz, y), ImColor(col1));
-	draw_list->AddQuadFilled(ImVec2(x, y + 0.25 * sz), ImVec2(x + 0.5 * sz, y + 0.5 * sz), ImVec2(x + 0.5 * sz, y + 1.0 * sz), ImVec2(x, y + 0.75 * sz), ImColor(col2));
-	draw_list->AddQuadFilled(ImVec2(x + 0.5 * sz, y + 0.5 * sz), ImVec2(x + sz, y + 0.25 * sz), ImVec2(x + sz, y + 0.75 * sz), ImVec2(x + 0.5 * sz, y + 1.0 * sz), ImColor(col3));
-	draw_list->AddLine(ImVec2(x + 0.75 * sz, y + 0.375 * sz), ImVec2(x + 0.75 * sz, y + 0.875 * sz), ImColor(col4));
-	draw_list->AddBezierCubic(ImVec2(x + 0.72 * sz, y + 0.24 * sz), ImVec2(x + 0.68 * sz, y + 0.15 * sz), ImVec2(x + 0.48 * sz, y + 0.13 * sz), ImVec2(x + 0.39 * sz, y + 0.17 * sz), ImColor(col4), 10, 18);
-	draw_list->AddBezierCubic(ImVec2(x + 0.39 * sz, y + 0.17 * sz), ImVec2(x + 0.2 * sz, y + 0.25 * sz), ImVec2(x + 0.3 * sz, y + 0.35 * sz), ImVec2(x + 0.49 * sz, y + 0.38 * sz), ImColor(col4), 10, 18);
-}
-
-void GUI::renderBezier(std::vector<std::vector<ImVec2>>& curves,  std::vector<std::vector<Brush>>& strokes, Brush& brushState) // Takes a 2D vector of Curves
+void GUI::renderBezier(std::vector<std::vector<ImVec2>>& curves,  std::vector<std::vector<Brush>>& strokes, Brush& brushState, bool& showControlPoints) // Takes a 2D vector of Curves
 {
 	ImGui::Begin("Sumi-e Curve Editor");
 
-	int dip = 0; // Initialize so that we do not dip
+
 	if (ImGui::Button("New Stroke")) {
 		curves.push_back(std::vector<ImVec2>());
 		strokes.push_back(std::vector<Brush>());
-		//dip = 1; // Dip the brush and add it to the back of stroke list
 		//Brush tmp(brushState.m_brushSize, brushState.m_pressure, brushState.m_wetness, brushState.m_angle);
 		//strokes.back().push_back(tmp); 
 	}
@@ -72,8 +53,8 @@ void GUI::renderBezier(std::vector<std::vector<ImVec2>>& curves,  std::vector<st
 
 	// Draw the canvas background
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
-	draw_list->AddRectFilled(canvas_topLeft, canvas_bottomRight, IM_COL32(30, 30, 30, 255));// Background color
-	draw_list->AddRect(canvas_topLeft, canvas_bottomRight, IM_COL32(220, 220, 220, 255));	// Canvas color
+	draw_list->AddRectFilled(canvas_topLeft, canvas_bottomRight, IM_COL32(250, 250, 250, 255));// Background color
+	draw_list->AddRect(canvas_topLeft, canvas_bottomRight, IM_COL32(30, 30, 30, 255));	// Canvas color
 
 	// Mouse click listener to add control points
 	ImGui::InvisibleButton("canvas", canvas_size);
@@ -83,60 +64,43 @@ void GUI::renderBezier(std::vector<std::vector<ImVec2>>& curves,  std::vector<st
 		ImVec2 mousePos = ImVec2(ImGui::GetMousePos().x - canvas_topLeft.x, ImGui::GetMousePos().y - canvas_topLeft.y);
 		currCurve.push_back(mousePos);
 
-		// Snapshot the global brush settings and push it onto the stroke
+		// Snapshot the global brush settings and copy it into the stroke vector
 		Brush tmpBrush(brushState.m_brushSize, brushState.m_pressure, brushState.m_colors[0], brushState.m_colors[1], brushState.m_colors[2], brushState.m_wetness, brushState.m_angle);
 		currStroke.push_back(tmpBrush);
-		std::cout << "position: (" << currCurve.back().x << ", " << currCurve.back().y << ")" << std::endl;
-		tmpBrush.print();
+
+		#if DEBUG
+			std::cout << "position: (" << currCurve.back().x << ", " << currCurve.back().y << ")" << std::endl;
+			tmpBrush.print();
+		#endif
 	}
-	// Undo last control point if not empty
+
+	// Undo last control point and brush if not empty
 	else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right) && currCurve.size() > 0)
 	{
 		currCurve.pop_back();
+		currStroke.pop_back();
 	}
 
-	// Draw all curves
-	for (std::vector<ImVec2> curvePt : curves)
-	{
-		for (int i = 0; i < curvePt.size(); i++)
-		{
-			draw_list->AddCircleFilled(ImVec2(canvas_topLeft.x + curvePt[i].x, canvas_topLeft.y + curvePt[i].y), 5.0f, IM_COL32(255, 0, 0, 255));
-			if (i > 0)
-			{
-				draw_list->AddLine(
-					ImVec2(canvas_topLeft.x + curvePt[i - 1].x, canvas_topLeft.y + curvePt[i - 1].y),
-					ImVec2(canvas_topLeft.x + curvePt[i].x, canvas_topLeft.y + curvePt[i].y),
-					IM_COL32(0, 0, 255, 255), 2.0f);
-			}
-		}
-
 	
+	// ToDo: Add a toggle button to show or hide these dots
+	// Draw the control points on the screen and point to point lines
+	for (int i = 0; i < curves.size(); i++)
+	{
+		drawControlPointsAndLines(curves[i], canvas_topLeft, draw_list, showControlPoints);
 
-		if (curvePt.size() >= 2)
-		{
-			int steps = 100; // Number of segments for smooth line
-			ImVec2 prev = calculateBezierPoints(curvePt, 0.0f);
-			for (int i = 1; i < steps + 1; i++)
-			{
-				float t = (float)i / (float)steps;
-				ImVec2 curr = calculateBezierPoints(curvePt, t);
-				draw_list->AddLine(
-					ImVec2(canvas_topLeft.x + prev.x, canvas_topLeft.y + prev.y),
-					ImVec2(canvas_topLeft.x + curr.x, canvas_topLeft.y + curr.y),
-					IM_COL32(0, 255, 0, 255), 2.0f);
-				prev = curr;
-			}
-		}
+		drawBezierCurve(curves[i], canvas_topLeft, strokes[i], draw_list);
+	
+		
 	}
 
 	ImGui::End();
 }
 
-void GUI::updateBrush(Brush& brush)
+void GUI::mainMenu(Brush& brush, bool& showControlPoints)
 {
-	
+
 	ImGui::Text("Brush Settings");               // Display some text (you can use a format strings too)
-	
+
 	// Brush setup
 	ImGui::SliderFloat("pressure", &brush.m_pressure, 0.0f, 1.0f, "%.2f");            // Edit 1 float using a slider from 0.0f to 1.0f
 	ImGui::SameLine(); GUI::HelpMarker(
@@ -171,7 +135,10 @@ void GUI::updateBrush(Brush& brush)
 		"Hold SHIFT/ALT for faster/slower edit.\n"
 		"Double-click or CTRL+click to input value.");
 
-
+	ImGui::Checkbox("Show control points", &showControlPoints);
+	ImGui::SameLine(); GUI::HelpMarker(
+		"Select to show your control points"
+	);
 }
 
 void GUI::render()
@@ -201,9 +168,11 @@ void GUI::HelpMarker(const char* desc)
 	}
 }
 
-ImVec2 GUI::calculateBezierPoints(const std::vector<ImVec2>& control_points, float t) {
-	std::vector<ImVec2> points = control_points;
-	while (points.size() > 1) {
+ImVec2 GUI::calculateBezierPoints(const std::vector<ImVec2>& controlPoints, float t) 
+{
+	std::vector<ImVec2> points = controlPoints;
+	while (points.size() > 1) 
+	{
 		for (int i = 0; i < points.size() - 1; ++i) {
 			points[i].x = (1.0f - t) * points[i].x + t * points[i + 1].x;
 			points[i].y = (1.0f - t) * points[i].y + t * points[i + 1].y;
@@ -212,3 +181,47 @@ ImVec2 GUI::calculateBezierPoints(const std::vector<ImVec2>& control_points, flo
 	}
 	return points[0];
 }
+
+void GUI::drawControlPointsAndLines(std::vector<ImVec2>& curvePt, ImVec2& canvas_topLeft, ImDrawList* draw_list, bool& show)
+{
+	if (show)
+	{
+		for (int i = 0; i < curvePt.size(); i++)
+		{
+			draw_list->AddCircleFilled(ImVec2(canvas_topLeft.x + curvePt[i].x, canvas_topLeft.y + curvePt[i].y), 5.0f, IM_COL32(255, 0, 0, 255));
+			if (i > 0)
+			{
+				draw_list->AddLine(
+					ImVec2(canvas_topLeft.x + curvePt[i - 1].x, canvas_topLeft.y + curvePt[i - 1].y),
+					ImVec2(canvas_topLeft.x + curvePt[i].x, canvas_topLeft.y + curvePt[i].y),
+					IM_COL32(0, 0, 255, 255), 2.0f);
+			}
+		}
+	}
+}
+
+void GUI::drawBezierCurve(std::vector<ImVec2> &curve, ImVec2& canvas_topLeft, std::vector<Brush> &stroke, ImDrawList* draw_list)
+{
+	// Draw the link segments
+	if (curve.size() >= 2)
+	{
+		int steps = 100; // Number of segments for smooth line
+		int brushCount = 0;
+		ImVec2 prev = calculateBezierPoints(curve, 0.0f);
+		Brush& currBrush = stroke[brushCount];
+		for (int i = 1; i < steps + 1; i++)
+		{
+			float t = (float)i / (float)steps;
+			float strokeFlowCoeff = -(std::powf((2.0f * t - 1.0f), 4.0f)) + 1.0f; // coeff = -(t-1)^2 + 1, approximating gaussian curve from [0, 1]
+			ImVec2 curr = calculateBezierPoints(curve, t);
+			draw_list->AddLine(
+				ImVec2(canvas_topLeft.x + prev.x, canvas_topLeft.y + prev.y),
+				ImVec2(canvas_topLeft.x + curr.x, canvas_topLeft.y + curr.y),
+				IM_COL32(0.3f, 0.3f, 0.3f, 255), currBrush.m_pressure * (float)currBrush.m_brushSize * strokeFlowCoeff);
+			prev = curr;
+			brushCount++;
+			
+		}
+	}
+}
+

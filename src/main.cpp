@@ -109,6 +109,7 @@ int main(int, char**)
     myGUI.init(window, glsl_version);
 
     Brush brushState;
+    bool showControlPoints;
     std::vector<std::vector<ImVec2>> curves;
     std::vector<std::vector<Brush>> strokes;
 
@@ -119,14 +120,14 @@ int main(int, char**)
 
       
         // Rendering
-        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.3f, 0.3f, 0.3f, 0.3f);
         glClear(GL_COLOR_BUFFER_BIT);
         // Create the main window to hold the application
         ImGui::Begin("Brush Settings");
-        myGUI.updateBrush(brushState);
+        myGUI.mainMenu(brushState, showControlPoints);
 
         ImGui::End();
-        myGUI.renderBezier(curves, strokes, brushState);
+        myGUI.renderBezier(curves, strokes, brushState, showControlPoints);
         myGUI.render();
         glfwSwapBuffers(window);
     }
