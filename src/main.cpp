@@ -5,18 +5,18 @@
 * @author Benji Northrop
 */
 
-// Dependent libraries
+// Standard Cpp libraries
 #include <iostream>
-#include <glad/glad.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
 #include <stdio.h>
-#define GL_SILENCE_DEPRECATION
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 #include <vector>
+
+// Dependency file headers
+#include "glad/glad.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+#define GL_SILENCE_DEPRECATION
+#include "GLFW/glfw3.h" // Will drag system OpenGL headers
 
 // local program header files
 #include "ShaderProgram.h"
@@ -118,15 +118,15 @@ int main(int, char**)
         glfwPollEvents();
         myGUI.newFrame();
 
-      
         // Rendering
         glClearColor(0.3f, 0.3f, 0.3f, 0.3f);
         glClear(GL_COLOR_BUFFER_BIT);
         // Create the main window to hold the application
         ImGui::Begin("Brush Settings");
         myGUI.mainMenu(brushState, showControlPoints);
-
         ImGui::End();
+
+        // Run the algorithm to draw the image
         myGUI.renderBezier(curves, strokes, brushState, showControlPoints);
         myGUI.render();
         glfwSwapBuffers(window);

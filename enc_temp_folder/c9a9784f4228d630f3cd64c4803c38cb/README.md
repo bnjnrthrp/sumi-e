@@ -10,7 +10,7 @@ is a "snapshot" of the brush's state when you clicked the mouse. The only thing 
 is the number of bristles in a brush.
 
 Currently working: Brush size, pressure, color (all together)
-Not working: brush rotation, color by location (tip, mid, base), wetness
+Not working: angle, color by location (tip, mid, base), 
 
 # Dependencies
 

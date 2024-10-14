@@ -73,13 +73,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./include/</IncludePath>
     <SourcePath>$(VC_SourcePath);./sumi-e/lib/</SourcePath>
-    <LibraryPath>C:\Users\benji\dev\Cpp\libs;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./include/</IncludePath>
     <SourcePath>$(VC_SourcePath);./sumi-e/lib/</SourcePath>
-    <LibraryPath>C:\Users\benji\dev\Cpp\libs;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -181,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="include\imgui\imgui.natstepfilter" />
+    <None Include="README.md" />
     <None Include="shaders\basic.frag" />
     <None Include="shaders\basic.vert" />
   </ItemGroup>
