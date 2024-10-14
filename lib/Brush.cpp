@@ -45,5 +45,4 @@ void Brush::lerpBrush(float a, Brush& prev, Brush& curr)
 	m_angle = (1.0f - a) * (prev.m_angle) + (a) * (curr.m_angle);
 }
 
-int Brush::getBrushSize() { return m_brushSize; }
 // Private Methods ------------------------------

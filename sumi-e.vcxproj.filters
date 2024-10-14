@@ -45,18 +45,6 @@
     <ClCompile Include="lib\Brush.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lib\Bristle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\Stroke.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\Dip.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\Paper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="lib\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -108,21 +96,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Brush.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Bristle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Stroke.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Dip.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Paper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ControlPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\ShaderProgram.h">

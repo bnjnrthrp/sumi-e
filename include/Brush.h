@@ -1,8 +1,6 @@
 #ifndef BRUSH_H
 #define BRUSH_H
 
-#include "Bristle.h"
-
 
 static const int DEFAULT_MAX_SIZE = 100;
 class Brush

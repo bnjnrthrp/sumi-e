@@ -146,8 +146,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="lib\GUI.cpp" />
-    <ClCompile Include="lib\Dip.cpp" />
-    <ClCompile Include="lib\Bristle.cpp" />
     <ClCompile Include="lib\Brush.cpp" />
     <ClCompile Include="include\imgui\imgui.cpp" />
     <ClCompile Include="include\imgui\imgui_demo.cpp" />
@@ -158,20 +156,15 @@
     <ClCompile Include="include\imgui\imgui_tables.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="lib\glad.c" />
-    <ClCompile Include="lib\Paper.cpp" />
     <ClCompile Include="lib\ShaderProgram.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="lib\Stroke.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\GUI.h" />
-    <ClInclude Include="include\Dip.h" />
-    <ClInclude Include="include\Bristle.h" />
     <ClInclude Include="include\Brush.h" />
     <ClInclude Include="include\glad\glad.h" />
     <ClInclude Include="include\GLFW\glfw3.h" />
     <ClInclude Include="include\GLFW\glfw3native.h" />
-    <ClInclude Include="include\ControlPoint.h" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
     <ClInclude Include="include\imgui\imgui_impl_glfw.h" />
@@ -183,9 +176,7 @@
     <ClInclude Include="include\imgui\imstb_textedit.h" />
     <ClInclude Include="include\imgui\imstb_truetype.h" />
     <ClInclude Include="include\KHR\khrplatform.h" />
-    <ClInclude Include="include\Paper.h" />
     <ClInclude Include="include\stb_image.h" />
-    <ClInclude Include="include\Stroke.h" />
     <ClInclude Include="include\ShaderProgram.h" />
   </ItemGroup>
   <ItemGroup>
