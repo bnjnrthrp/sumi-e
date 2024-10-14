@@ -18,6 +18,7 @@ public:
 	float m_angle;
 
 	// Getters/Setters
+	void lerpBrush(float a, Brush& prev, Brush& curr);
 	int getBrushSize();
 	void print();
 private:

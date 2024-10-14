@@ -26,5 +26,24 @@ void Brush::print()
 		<< "Angle: " << m_angle << std::endl;
 }
 
+void Brush::lerpBrush(float a, Brush& prev, Brush& curr)
+{	
+
+	// Does not adjust size
+	float lerpColor1 = (1.0f - a) * (prev.m_colors[0]) + (a) * (curr.m_colors[0]);
+	float lerpColor2 = (1.0f - a) * (prev.m_colors[1]) + (a) * (curr.m_colors[1]);
+	float lerpColor3 = (1.0f - a) * (prev.m_colors[2]) + (a) * (curr.m_colors[2]);
+
+
+
+	m_brushSize = prev.m_brushSize;
+	m_pressure = (1.0f - a) * (prev.m_pressure) + (a) * (curr.m_pressure);
+	m_colors[0] = lerpColor1;
+	m_colors[1] = lerpColor2;
+	m_colors[2] = lerpColor3;
+	m_wetness = (1.0f - a) * (prev.m_wetness) + (a) * (curr.m_wetness);
+	m_angle = (1.0f - a) * (prev.m_angle) + (a) * (curr.m_angle);
+}
+
 int Brush::getBrushSize() { return m_brushSize; }
 // Private Methods ------------------------------

@@ -29,18 +29,30 @@ void GUI::renderBezier(std::vector<std::vector<ImVec2>>& curves,  std::vector<st
 	ImGui::Begin("Sumi-e Curve Editor");
 
 
-	if (ImGui::Button("New Stroke")) {
-		curves.push_back(std::vector<ImVec2>());
-		strokes.push_back(std::vector<Brush>());
+	if (ImGui::Button("New Stroke (n)") || ImGui::IsKeyPressed(ImGuiKey_N))
+	{
+		curves.emplace_back(std::vector<ImVec2>());
+		strokes.emplace_back(std::vector<Brush>());
 		//Brush tmp(brushState.m_brushSize, brushState.m_pressure, brushState.m_wetness, brushState.m_angle);
 		//strokes.back().push_back(tmp); 
 	}
+
 
 	if (curves.empty() || strokes.empty())
 	{
 		ImGui::End();
 		return; // Early return if curves is empty, skipping any drawing.
 	}
+	ImGui::SameLine();
+	if (ImGui::Button("Undo Stroke (z)") || ImGui::IsKeyPressed(ImGuiKey_Z))
+	{
+		if (curves.size() > 1)
+			curves.pop_back();
+		if (strokes.size() > 1)
+			strokes.pop_back();
+	}
+
+
 	std::vector<ImVec2>& currCurve = curves.back(); // Grab the last curve
 	std::vector<Brush>& currStroke = strokes.back(); // Set the current brush to the last known state
 
@@ -71,6 +83,12 @@ void GUI::renderBezier(std::vector<std::vector<ImVec2>>& curves,  std::vector<st
 		#if DEBUG
 			std::cout << "position: (" << currCurve.back().x << ", " << currCurve.back().y << ")" << std::endl;
 			tmpBrush.print();
+			std::cout << "Total brushes: " << std::endl;
+			for (int i = 0; i < currStroke.size(); i++) {
+				std::cout << "Brush " << i << std::endl;
+				currStroke[i].print();
+				std::cout << std::endl;
+			}
 		#endif
 	}
 
@@ -86,6 +104,7 @@ void GUI::renderBezier(std::vector<std::vector<ImVec2>>& curves,  std::vector<st
 	// Draw the control points on the screen and point to point lines
 	for (int i = 0; i < curves.size(); i++)
 	{
+		
 		drawControlPointsAndLines(curves[i], canvas_topLeft, draw_list, showControlPoints);
 
 		drawBezierCurve(curves[i], canvas_topLeft, strokes[i], draw_list);
@@ -139,6 +158,7 @@ void GUI::mainMenu(Brush& brush, bool& showControlPoints)
 	ImGui::SameLine(); GUI::HelpMarker(
 		"Select to show your control points"
 	);
+
 }
 
 void GUI::render()
@@ -189,6 +209,7 @@ void GUI::drawControlPointsAndLines(std::vector<ImVec2>& curvePt, ImVec2& canvas
 		for (int i = 0; i < curvePt.size(); i++)
 		{
 			draw_list->AddCircleFilled(ImVec2(canvas_topLeft.x + curvePt[i].x, canvas_topLeft.y + curvePt[i].y), 5.0f, IM_COL32(255, 0, 0, 255));
+			
 			if (i > 0)
 			{
 				draw_list->AddLine(
@@ -205,22 +226,55 @@ void GUI::drawBezierCurve(std::vector<ImVec2> &curve, ImVec2& canvas_topLeft, st
 	// Draw the link segments
 	if (curve.size() >= 2)
 	{
-		int steps = 100; // Number of segments for smooth line
-		int brushCount = 0;
+		ImDrawListFlags_AntiAliasedLines;
+		int steps = 100 + 100 * curve.size() / 5; // 100 segments per 5 points
+		// Initialize the brush tracking indices
+		// We linearly interpolate the brush parameters from the beginning to end of each stroke.
+		int brushIndex = 1;
+		float brushRatio = 1.0f / ((float)stroke.size() - 1.0f);
+		float prevThreshold = 0.0f;
+		float currThreshold = brushRatio;
+
 		ImVec2 prev = calculateBezierPoints(curve, 0.0f);
-		Brush& currBrush = stroke[brushCount];
+		Brush tmpBrush;
+		Brush prevBrush = stroke[brushIndex - 1];
+		int BRUSH_SIZE = prevBrush.m_brushSize; // Brush size cannot change in the middle of a stroke
+		#if DEBUG
+			std::cout << std::endl << "drawBezierCurve" << std::endl;
+			std::cout << "prev: " << std::endl;
+			prevBrush.print();
+		#endif
+			
 		for (int i = 1; i < steps + 1; i++)
 		{
 			float t = (float)i / (float)steps;
-			float strokeFlowCoeff = -(std::powf((2.0f * t - 1.0f), 4.0f)) + 1.0f; // coeff = -(t-1)^2 + 1, approximating gaussian curve from [0, 1]
+			float strokeFlowCoeff = -(std::powf((2.0f * t - 1.0f), 4.0f)) + 1.0f; // coeff = -(t-1)^2 + 1, approximating gaussian curve from [0, 1]  
 			ImVec2 curr = calculateBezierPoints(curve, t);
+			Brush currBrush = stroke[brushIndex];
+			float a = ((float)t - prevThreshold) / brushRatio; // Determine the alpha blend ratio
+
+			// alpha blend the brush values
+			tmpBrush.lerpBrush(a, prevBrush, currBrush);
+
 			draw_list->AddLine(
 				ImVec2(canvas_topLeft.x + prev.x, canvas_topLeft.y + prev.y),
 				ImVec2(canvas_topLeft.x + curr.x, canvas_topLeft.y + curr.y),
-				IM_COL32(0.3f, 0.3f, 0.3f, 255), currBrush.m_pressure * (float)currBrush.m_brushSize * strokeFlowCoeff);
+				IM_COL32(tmpBrush.m_colors[0] * 255, tmpBrush.m_colors[1] * 255, tmpBrush.m_colors[2] * 255, 255), tmpBrush.m_pressure * (float)tmpBrush.m_brushSize * strokeFlowCoeff);
 			prev = curr;
-			brushCount++;
-			
+			if (t > currThreshold)
+			{
+				prevBrush = currBrush;
+				currBrush = stroke[++brushIndex];
+				prevThreshold = currThreshold;
+				currThreshold += brushRatio;
+				#if DEBUG
+				std::cout << "Set next brush: " << brushIndex << std::endl;
+				std::cout << "t: " << t << std::endl;
+				std::cout << "currThreshold: " << currThreshold << std::endl;
+				std::cout << "Brush: " << std::endl;
+				tmpBrush.print();
+				#endif
+			}
 		}
 	}
 }
