@@ -1,6 +1,15 @@
 #ifndef BRUSH_H
 #define BRUSH_H
 
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "./imgui/imgui_internal.h"
+#include "./imgui/imgui.h"
+
+enum component {
+	BRUSH_BASE,
+	BRUSH_MID,
+	BRUSH_TIP
+};
 
 static const int DEFAULT_MAX_SIZE = 100;
 class Brush
@@ -17,9 +26,11 @@ public:
 
 	// Getters/Setters
 	void lerpBrush(float a, Brush& prev, Brush& curr);
-	int getBrushSize();
 	void print();
+	void calculateQuad(ImVec2& prev, ImVec2& curr, component component, ImVec2& q1, ImVec2& q2, ImVec2& q3, ImVec2& q4);
 private:
+	void addParametric(const ImVec2& pt, const double scale, const double t, const ImVec2& vector, ImVec2& dest);
+	void normalize(ImVec2& vector);
 };
 
 #endif // BRUSH_H

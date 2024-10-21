@@ -256,10 +256,54 @@ void GUI::drawBezierCurve(std::vector<ImVec2> &curve, ImVec2& canvas_topLeft, st
 			// alpha blend the brush values
 			tmpBrush.lerpBrush(a, prevBrush, currBrush);
 
-			draw_list->AddLine(
+			// Determine quad points and put into temp variable
+			ImVec2 q[4];
+		
+			tmpBrush.calculateQuad(prev, curr, BRUSH_BASE, q[0], q[1], q[2], q[3]);
+			for (int i = 0; i < 4; i++)
+			{
+				q[i] += canvas_topLeft;
+			}
+			draw_list->AddQuad(q[0], q[1], q[2], q[3], IM_COL32(tmpBrush.m_colors[2] * 255, tmpBrush.m_colors[2] * 255, tmpBrush.m_colors[2] * 255, 255), tmpBrush.m_pressure * (float)tmpBrush.m_brushSize * strokeFlowCoeff);
+			
+			tmpBrush.calculateQuad(prev, curr, BRUSH_MID, q[0], q[1], q[2], q[3]);
+			for (int i = 0; i < 4; i++)
+			{
+				q[i] += canvas_topLeft;
+			}
+			draw_list->AddQuad(q[0], q[1], q[2], q[3], IM_COL32(tmpBrush.m_colors[1] * 255, tmpBrush.m_colors[1] * 255, tmpBrush.m_colors[1] * 255, 255), tmpBrush.m_pressure * (float)tmpBrush.m_brushSize * strokeFlowCoeff);
+
+			tmpBrush.calculateQuad(prev, curr, BRUSH_TIP, q[0], q[1], q[2], q[3]);
+			for (int i = 0; i < 4; i++)
+			{
+				q[i] += canvas_topLeft;
+			}
+			draw_list->AddQuad(q[0], q[1], q[2], q[3], IM_COL32(tmpBrush.m_colors[0] * 255, tmpBrush.m_colors[0] * 255, tmpBrush.m_colors[0] * 255, 255), tmpBrush.m_pressure * (float)tmpBrush.m_brushSize * strokeFlowCoeff);
+			
+
+
+
+
+			#if DEBUG
+			std::cout << "pressure: " << tmpBrush.m_pressure << std::endl;
+			std::cout << "brush Size: " << tmpBrush.m_brushSize << std::endl;
+			std::cout << "stroke coeff: " << strokeFlowCoeff << std::endl;
+			std::cout << "thickness: " << tmpBrush.m_pressure * (float)tmpBrush.m_brushSize * strokeFlowCoeff << std::endl;
+
+			std::cout << "Quad points after adding: " << std::endl;
+			std::cout << "(" << q1.x << ", " << q1.y << ")" << std::endl;
+			std::cout << "(" << q2.x << ", " << q2.y << ")" << std::endl;
+			std::cout << "(" << q3.x << ", " << q3.y << ")" << std::endl;
+			std::cout << "(" << q4.x << ", " << q4.y << ")" << std::endl;
+			#endif
+
+			// Draw the quad for the base, middle, and tip in order so they stack on each other.
+			
+
+			/*draw_list->AddLine(
 				ImVec2(canvas_topLeft.x + prev.x, canvas_topLeft.y + prev.y),
 				ImVec2(canvas_topLeft.x + curr.x, canvas_topLeft.y + curr.y),
-				IM_COL32(tmpBrush.m_colors[0] * 255, tmpBrush.m_colors[1] * 255, tmpBrush.m_colors[2] * 255, 255), tmpBrush.m_pressure * (float)tmpBrush.m_brushSize * strokeFlowCoeff);
+				IM_COL32(tmpBrush.m_colors[0] * 255, tmpBrush.m_colors[1] * 255, tmpBrush.m_colors[2] * 255, 255), tmpBrush.m_pressure * (float)tmpBrush.m_brushSize * strokeFlowCoeff);*/
 			prev = curr;
 			if (t > currThreshold)
 			{
