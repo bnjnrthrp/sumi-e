@@ -2,7 +2,7 @@
 
 This is a demo project to make sumi-e paintings using the mouse and keyboard.
 
-# How is works
+# How it works
 
 When you start the program, press "new stroke" to open the canvas and begin your first brush stroke.
 Click the left mouse to add a control point, right click the mouse to undo the control point. A control point
